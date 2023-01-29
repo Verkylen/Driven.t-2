@@ -35,3 +35,12 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
     res.sendStatus(500);
   }
 }
+
+export async function postTicket(req: AuthenticatedRequest, res: Response) {
+  try {
+    await ticketsService.postTicket(req.body.ticketTypeId, req.userId);
+    res.sendStatus(201);
+  } catch {
+    res.sendStatus(500);
+  }
+}

@@ -25,4 +25,19 @@ function validate(schema: ObjectSchema, type: "body" | "params") {
   };
 }
 
+export function validatePostTicketsBody(schema: ObjectSchema): ValidationMiddleware {
+  function validateFunction(req: Request, res: Response, next: NextFunction) {
+    const validation = schema.validate(req.body);
+
+    if ("error" in validation) {
+      res.sendStatus(httpStatus.BAD_REQUEST);
+      return;
+    }
+
+    next();
+  }
+  
+  return validateFunction;
+}
+
 type ValidationMiddleware = (req: Request, res: Response, next: NextFunction)=> void;
