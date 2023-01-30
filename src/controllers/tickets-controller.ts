@@ -21,7 +21,7 @@ export async function getTicketsWithoutTypes(_req: Request, res: Response) {
   }
 }
 
-export async function getTickets(req: AuthenticatedRequest, res: Response) {
+export async function getTickets(req: AuthenticatedRequest, res: Response) {  
   try {
     const data: Ticket = await ticketsService.getTickets(req.userId);
 
@@ -38,9 +38,14 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
 
 export async function postTicket(req: AuthenticatedRequest, res: Response) {
   try {
-    await ticketsService.postTicket(req.body.ticketTypeId, req.userId);
-    res.sendStatus(201);
-  } catch {
+    const data: Ticket = await ticketsService.postTicket(req.body.ticketTypeId, req.userId);
+    res.status(201).send(data);
+  } catch(error) {
+    if (error.name === "NotFoundError") {
+      res.status(404).send(error);
+      return;
+    }
+    
     res.sendStatus(500);
   }
 }

@@ -1,15 +1,15 @@
 import { prisma } from "@/config";
-import { Enrollment, TicketType } from "@prisma/client";
+import { Enrollment, Prisma, PrismaPromise, TicketType } from "@prisma/client";
 import { Ticket } from "@prisma/client";
 
-function selectTicketTypes(): Promise<TicketType[]> {
+function selectTicketTypes(): PrismaPromise<TicketType[]> {
   return prisma.ticketType.findMany();
 }
 
-function selectTickets(userId: number): Promise<Ticket[]> {
+function selectTickets(userId: number): PrismaPromise<Ticket[]> {
   return prisma.ticket.findMany({
     where: {
-      id: userId
+      Enrollment: { userId }
     },
     include: {
       TicketType: true
@@ -17,22 +17,34 @@ function selectTickets(userId: number): Promise<Ticket[]> {
   });
 }
 
-async function insertTicket(ticketTypeId: number, userId: number): Promise<Ticket> {
-  const enrollment: Enrollment = await prisma.enrollment.findUnique({ where: { userId } });
+function readEnrollmentThroughUserId(userId: number): Prisma.Prisma__EnrollmentClient<Enrollment> {
+  return prisma.enrollment.findUnique({ where: { userId } });
+}
 
+function insertTicket(ticketTypeId: number, enrollmentId: number): Prisma.Prisma__TicketClient<Ticket> {
   return prisma.ticket.create({
     data: {
-      ticketTypeId: ticketTypeId,
-      enrollmentId: enrollment.id,
+      ticketTypeId,
+      enrollmentId,
       status: "RESERVED"
-    }
+    },
+    include: { TicketType: true }
+  });
+}
+
+function updateTicket(id: number): Prisma.Prisma__TicketClient<Ticket> {
+  return prisma.ticket.update({
+    where: { id },
+    data: { status: "PAID" }
   });
 }
 
 const ticketRepository = {
   selectTicketTypes,
   selectTickets,
-  insertTicket
+  insertTicket,
+  updateTicket,
+  readEnrollmentThroughUserId
 };
 
 export default ticketRepository;

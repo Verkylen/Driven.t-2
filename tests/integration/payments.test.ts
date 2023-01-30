@@ -207,7 +207,7 @@ describe("POST /payments/process", () => {
         ticketId: ticket.id,
         value: ticketType.price,
         cardIssuer: body.cardData.issuer,
-        cardLastDigits: body.cardData.number.slice(-4),
+        cardLastDigits: body.cardData.number.toString().slice(-4),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
